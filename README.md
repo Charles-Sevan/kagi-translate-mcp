@@ -28,6 +28,33 @@ Edit `.env` and set your real API key:
 KAGI_API_KEY=your_real_key_here
 ```
 
+## Browser-session authentication (local extension)
+
+Alternatively, set `KAGI_TRANSLATE_AUTHORIZATION` to the value of your own
+`kagi_session` cookie / `X-Kagi-Authorization` header. This mode supports
+`translate_text` (including batches) and `proofread`; `translate_url` is not
+supported in session mode. Session credentials take precedence over an API key.
+
+To keep secrets in OpenCode's existing private service configuration, set only
+`KAGI_CREDENTIALS_FILE=/home/USER/.config/opencode/service.json` in the MCP's
+environment. The server reads the `env` object in that JSON file for
+`KAGI_TRANSLATE_AUTHORIZATION`, optional `KAGI_TRANSLATE_SESSION_TOKEN`, and
+`KAGI_API_KEY`. Environment variables take precedence over file values.
+It does not load unrelated credentials into its environment or modify the file.
+
+The client obtains a fresh Translate token from the authenticated homepage and
+refreshes it every 20 minutes. Responses from the web endpoints are decoded as
+UTF-8 SSE streams. If the underlying Kagi login is revoked or expires, renew
+`KAGI_TRANSLATE_AUTHORIZATION` locally and reconnect the MCP. Never commit or
+share session cookies; keep the credentials file private (mode `600`). This is
+an unofficial web-interface integration and may change independently of the API.
+
+Run the session-client tests after building:
+
+```bash
+node --test tests/session-client.test.mjs
+```
+
 ## Build
 
 ```bash
